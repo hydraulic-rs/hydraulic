@@ -1,11 +1,17 @@
 #[macro_use]
 extern crate glium;
 
-pub struct Application {}
+pub struct Application {
+    width: u32,
+    height: u32
+}
 
 impl Application {
-    pub fn new() -> Application {
-        Application {}
+    pub fn new(width: u32, height: u32) -> Application {
+        Application {
+            width: width,
+            height: height
+        }
     }
 
     pub fn run(&self) {
@@ -14,7 +20,7 @@ impl Application {
         let mut events_loop = glutin::EventsLoop::new();
         let window = glutin::WindowBuilder::new()
             .with_title("Hydraulic Example: Frames")
-            .with_dimensions(1024, 768);
+            .with_dimensions(self.width, self.height);
         let context = glutin::ContextBuilder::new().with_vsync(true);
         let display = glium::Display::new(window, context, &events_loop).unwrap();
 
@@ -67,17 +73,23 @@ impl Application {
             glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
                 .unwrap();
 
+        let frameX = 10;
+        let frameY = 10;
+
         let mut closed = false;
         while !closed {
             let mut target = display.draw();
             target.clear_color(0.05, 0.05, 0.05, 1.0);
+
+            let mx = (frameX as f32 / self.width as f32) - 1.0;
+            let my = (frameY as f32 / self.height as f32) - 1.0;
 
             let uniforms = uniform! {
                 matrix: [
                     [1.0, 0.0, 0.0, 0.0],
                     [0.0, 1.0, 0.0, 0.0],
                     [0.0, 0.0, 1.0, 0.0],
-                    [0.0, 0.0, 0.0, 1.0f32],
+                    [mx, my, 0.0, 1.0f32],
                 ]
             };
 
