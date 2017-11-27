@@ -125,8 +125,8 @@ impl Application {
     }
 
     fn render_view_hierarchy(&self, view: &View, target: &mut glium::Frame) {
-        let mx = (view.pos_x / self.width as f32) - 1.0;
-        let my = (view.pos_y / self.height as f32) - 1.0;
+        let mx = (view.pos_x / self.width as f32) * 2.0 - 1.0;
+        let my = (view.pos_y / self.height as f32) * 2.0 - 1.0;
 
         let uniforms = uniform! {
             matrix: [
