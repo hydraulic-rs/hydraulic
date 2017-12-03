@@ -1,8 +1,10 @@
+extern crate cgmath;
 #[macro_use]
 extern crate glium;
 
 pub mod view;
 
+use cgmath::{Matrix4, Vector3};
 use glium::{glutin, Surface};
 use view::View;
 
@@ -46,7 +48,9 @@ impl Application {
             .with_title("Hydraulic Example: Frames")
             .with_dimensions(self.width, self.height);
         let context = glutin::ContextBuilder::new().with_vsync(true);
-        self.display = Some(glium::Display::new(window, context, &self.events_loop.as_ref().unwrap()).unwrap());
+        self.display = Some(
+            glium::Display::new(window, context, &self.events_loop.as_ref().unwrap()).unwrap(),
+        );
         self.display.as_ref().unwrap();
 
         implement_vertex!(Vertex, position);
@@ -55,13 +59,13 @@ impl Application {
             position: [0.0, 0.0],
         };
         let vertex2 = Vertex {
-            position: [0.0, 0.5],
+            position: [1.0, 0.0],
         };
         let vertex3 = Vertex {
-            position: [0.5, 0.0],
+            position: [0.0, 1.0],
         };
         let vertex4 = Vertex {
-            position: [0.5, 0.5],
+            position: [1.0, 1.0],
         };
         let shape = vec![vertex1, vertex2, vertex3, vertex4];
 
@@ -106,7 +110,7 @@ impl Application {
         let mut closed = false;
         while !closed {
             let mut target = self.display.as_ref().unwrap().draw();
-            target.clear_color(0.05, 0.05, 0.05, 1.0);
+            target.clear_color(0.05, 0.05, 0.60, 1.0);
 
             self.render_view_hierarchy(&self.main_view, &mut target);
             target.finish().unwrap();
@@ -125,16 +129,22 @@ impl Application {
     }
 
     fn render_view_hierarchy(&self, view: &View, target: &mut glium::Frame) {
-        let mx = (view.pos_x / self.width as f32) * 2.0 - 1.0;
-        let my = (view.pos_y / self.height as f32) * 2.0 - 1.0;
+        let translate_matrix = Matrix4::from_translation(Vector3::new(
+            (view.pos_x / self.width as f32 * 2.0) - 1.0,
+            (view.pos_y / self.height as f32 * 2.0) - 1.0,
+            0.0,
+        ));
+
+        let scale_matrix = Matrix4::from_nonuniform_scale(
+            (view.width as f32 / self.width as f32 * 2.0),
+            (view.height as f32 / self.height as f32 * 2.0),
+            1.0,
+        );
+
+        let final_matrix = translate_matrix * scale_matrix;
 
         let uniforms = uniform! {
-            matrix: [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-                [mx, my, 0.0, 1.0f32],
-            ]
+            matrix: Into::<[[f32; 4]; 4]>::into(final_matrix)
         };
 
         target

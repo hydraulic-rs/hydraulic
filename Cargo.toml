@@ -5,3 +5,4 @@ authors = ["Dan Watkins <dwatkins@valpineware.com>"]
 
 [dependencies]
 glium = "0.18"
+cgmath = "0.15"
