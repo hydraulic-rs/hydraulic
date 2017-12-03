@@ -89,10 +89,11 @@ impl Application {
         let fragment_shader_src = r#"
             #version 140
 
-            out vec4 color;
+            uniform vec4 color;
+            out vec4 output_color;
 
             void main() {
-                color = vec4(0.0, 0.0, 0.0, 1.0);
+                output_color = color;
             }
         "#;
 
@@ -144,7 +145,8 @@ impl Application {
         let final_matrix = translate_matrix * scale_matrix;
 
         let uniforms = uniform! {
-            matrix: Into::<[[f32; 4]; 4]>::into(final_matrix)
+            matrix: Into::<[[f32; 4]; 4]>::into(final_matrix),
+            color: Into::<[f32; 4]>::into(view.color),
         };
 
         target
