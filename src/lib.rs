@@ -18,7 +18,6 @@ pub struct Application {
     height: u32,
     main_view: View,
 
-    events_loop: Option<glutin::EventsLoop>,
     display: Option<glium::Display>,
     program: Option<glium::Program>,
 
@@ -33,7 +32,6 @@ impl Application {
             height: height,
             main_view: main_view,
 
-            events_loop: None,
             display: None,
             program: None,
 
@@ -42,14 +40,14 @@ impl Application {
         }
     }
 
-    pub fn init(&mut self) {
-        self.events_loop = Some(glutin::EventsLoop::new());
+    pub fn run(&mut self) {
+        let mut events_loop = Some(glutin::EventsLoop::new());
         let window = glutin::WindowBuilder::new()
             .with_title("Hydraulic Example: Frames")
             .with_dimensions(self.width, self.height);
         let context = glutin::ContextBuilder::new().with_vsync(true);
         self.display = Some(
-            glium::Display::new(window, context, &self.events_loop.as_ref().unwrap()).unwrap(),
+            glium::Display::new(window, context, &events_loop.as_ref().unwrap()).unwrap(),
         );
         self.display.as_ref().unwrap();
 
@@ -105,10 +103,11 @@ impl Application {
                 None,
             ).unwrap(),
         );
-    }
 
-    pub fn run(&mut self) {
         let mut closed = false;
+        let mut cursor_pos_x : f32 = 0.0;
+        let mut cursor_pos_y : f32 = 0.0;
+
         while !closed {
             let mut target = self.display.as_ref().unwrap().draw();
             target.clear_color(0.05, 0.05, 0.60, 1.0);
@@ -116,12 +115,29 @@ impl Application {
             self.render_view_hierarchy(&self.main_view, &mut target);
             target.finish().unwrap();
 
-            self.events_loop
+            events_loop
                 .as_mut()
                 .unwrap()
                 .poll_events(|event| match event {
                     glutin::Event::WindowEvent { event, .. } => match event {
                         glutin::WindowEvent::Closed => closed = true,
+                        glutin::WindowEvent::MouseMoved {
+                            device_id,
+                            position,
+                        } => {
+                            cursor_pos_x = position.0 as f32;
+                            cursor_pos_y = self.height as f32 - position.1 as f32;
+                        }
+                        glutin::WindowEvent::MouseInput {
+                            device_id,
+                            state,
+                            button,
+                        } => if state == glutin::ElementState::Released
+                            && button == glutin::MouseButton::Left
+                        {
+                            println!("LeftMouseClick: {} , {}", cursor_pos_x, cursor_pos_y);
+                            self.handle_click_event(&self.main_view, cursor_pos_x, cursor_pos_y);
+                        },
                         _ => (),
                     },
                     _ => (),
@@ -161,6 +177,20 @@ impl Application {
 
         for child in view.children().iter() {
             self.render_view_hierarchy(child, target);
+        }
+    }
+
+    fn handle_click_event(&self, view: &View, pos_x: f32, pos_y: f32) {
+        println!("Checking view: {} , {} , {} , {}", view.pos_x, view.pos_y, view.width, view.height);
+
+        if pos_x >= view.pos_x && pos_x <= view.pos_x + view.width as f32 && pos_y >= view.pos_y
+            && pos_y <= view.pos_y + view.height as f32
+        {
+            println!("ViewClick");
+        }
+
+        for child in view.children().iter() {
+            self.handle_click_event(child, pos_x, pos_y);
         }
     }
 }
