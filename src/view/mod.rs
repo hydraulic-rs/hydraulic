@@ -40,7 +40,11 @@ impl View {
         self.children.push(view);
     }
 
-    pub fn children(&mut self) -> &mut Vec<View> {
+    pub fn children(&self) -> &Vec<View> {
+        &self.children
+    }
+
+    pub fn children_mut(&mut self) -> &mut Vec<View> {
         &mut self.children
     }
 }

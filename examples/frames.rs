@@ -8,17 +8,33 @@ fn main() {
     let mut main_view = View::new(
         100.0,
         100.0,
-        100,
-        100,
+        300,
+        300,
         color::white(),
         Box::from(Frame::new()),
     );
     main_view.add_child(View::new(
-        600.0,
-        600.0,
-        10,
-        10,
-        color::blue(),
+        10.0,
+        10.0,
+        130,
+        130,
+        color::red(),
+        Box::from(Frame::new()),
+    ));
+    main_view.add_child(View::new(
+        160.0,
+        10.0,
+        130,
+        130,
+        color::green(),
+        Box::from(Frame::new()),
+    ));
+    main_view.add_child(View::new(
+        10.0,
+        150.0,
+        280,
+        130,
+        color::black(),
         Box::from(Frame::new()),
     ));
 

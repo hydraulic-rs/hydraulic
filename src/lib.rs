@@ -109,7 +109,7 @@ impl Application {
             let mut target = self.display.as_ref().unwrap().draw();
             target.clear_color(0.05, 0.05, 0.60, 1.0);
 
-            self.render_view_hierarchy(main_view, &mut target);
+            self.render_view_hierarchy(main_view, 0.0, 0.0, &mut target);
             target.finish().unwrap();
 
             events_loop
@@ -142,10 +142,10 @@ impl Application {
         }
     }
 
-    fn render_view_hierarchy(&self, view: &mut View, target: &mut glium::Frame) {
+    fn render_view_hierarchy(&self, view: &View, offset_x: f32, offset_y: f32, target: &mut glium::Frame) {
         let translate_matrix = Matrix4::from_translation(Vector3::new(
-            (view.pos_x / self.width as f32 * 2.0) - 1.0,
-            (view.pos_y / self.height as f32 * 2.0) - 1.0,
+            ((view.pos_x + offset_x) / self.width as f32 * 2.0) - 1.0,
+            ((view.pos_y + offset_y) / self.height as f32 * 2.0) - 1.0,
             0.0,
         ));
 
@@ -172,8 +172,8 @@ impl Application {
             )
             .unwrap();
 
-        for child in view.children().iter_mut() {
-            self.render_view_hierarchy(child, target);
+        for child in view.children().iter() {
+            self.render_view_hierarchy(child, offset_x + view.pos_x, offset_y + view.pos_y, target);
         }
     }
 
@@ -189,7 +189,7 @@ impl Application {
             );
         }
 
-        for child in view.children().iter_mut() {
+        for child in view.children_mut().iter_mut() {
             self.handle_click_event(child, pos_x, pos_y);
         }
     }
